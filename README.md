@@ -1,1 +1,1 @@
-# proto-api
+# flight-api

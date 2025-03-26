@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package flightsearch;
+
+import "google/type/money.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/traveldpoc/flight-api/gen/v1;flightsearch";
+
+
+// Represents a location (airport).
+message Location {
+  string airport_code = 1; // IATA airport code (e.g., "JFK", "LHR").
+  string city_code = 2; // IATA city code (e.g., "NYC", "LON").
+  string city_name = 3; // City name (e.g., "New York", "London").
+  string country_code = 4; // ISO 3166-1 alpha-2 country code (e.g., "US", "GB").
+  string country_name = 5; // Country name (e.g., "United States", "United Kingdom").
+}
+
+// Represents a single segment of a flight (e.g., JFK -> LHR).
+message FlightSegment {
+  string operating_carrier_code = 1; // IATA code of the operating carrier (e.g., "AA").
+  string marketing_carrier_code = 2; // IATA code of the marketing carrier (e.g., "BA" for a codeshare).
+  string flight_number = 3; // Flight number (e.g., "123").
+  Location departure_location = 4;
+  Location arrival_location = 5;
+  google.protobuf.Timestamp departure_time = 6;
+  google.protobuf.Timestamp  arrival_time = 7;
+  string aircraft_code = 8; // Aircraft type code (e.g., "777", "320").
+  int32 duration_minutes = 9; // Duration of the segment in minutes.
+}
+
+// Represents a leg of a flight (e.g., a sequence of segments).
+message FlightLeg {
+  repeated FlightSegment segments = 1; // Multiple segments for connecting flights.
+  int32 total_duration_minutes = 2; // Total duration of the leg in minutes.
+}
+
+// Represents a fare for a flight.
+message Fare {
+  enum FareType {
+    FARE_TYPE_UNSPECIFIED = 0;
+    PUBLISHED = 1; // Standard published fare.
+    PRIVATE = 2; // Negotiated or corporate fare.
+    NET = 3; // Net fare.
+    BULK = 4; // Bulk fare.
+    TOUR = 5; // Tour fare.
+  }
+  string fare_basis_code = 1; // Fare basis code (e.g., "YOW").
+  FareType fare_type = 2;
+  string cabin = 3; // Cabin class (e.g., "Economy", "Business", "First").
+  google.type.Money base_fare = 4; // Base fare amount.
+  google.type.Money taxes = 5; // Taxes and fees.
+  google.type.Money total_fare = 6; // Total fare amount (base + taxes).
+  string provider_specific_fare_id = 7; // unique id from provider
+  string rules = 8; // fare rules
+  bool is_refundable = 9;
+  bool is_changeable = 10;
+}
+
+// Represents a single flight option.
+message Flight {
+  repeated FlightLeg legs = 1; // Multiple legs for roundtrip or multi-city.
+  repeated Fare fares = 2; // Multiple fares for different cabin classes or fare types.
+  string provider = 3; // Name of the provider (e.g., "Amadeus", "United NDC").
+  string provider_flight_id = 4; // unique id from provider
+  int32 total_duration_minutes = 5; // Total duration of the flight in minutes.
+}
+
+// Represents a search query.
+message FlightSearchQuery {
+  enum TripType {
+    TRIP_TYPE_UNSPECIFIED = 0;
+    ONE_WAY = 1;
+    ROUND_TRIP = 2;
+    MULTI_CITY = 3;
+  }
+
+  TripType trip_type = 1;
+  repeated Location origin_locations = 2; // For multi-city, multiple origins.
+  repeated Location destination_locations = 3; // For multi-city, multiple destinations.
+  repeated google.protobuf.Timestamp departure_dates = 4; // For multi-city, multiple departure dates.
+  google.protobuf.Timestamp return_date = 5; // For roundtrip.
+  int32 number_of_passengers = 6;
+  string cabin_preference = 7; // Preferred cabin class (e.g., "Economy", "Business").
+  repeated string preferred_carriers = 8; // List of preferred carrier codes
+}
+
+// Represents a search result.
+message FlightSearchResult {
+  FlightSearchQuery query = 1;
+  repeated Flight flights = 2;
+  repeated CombinedRoundtrip combined_roundtrips = 3; // New field for combined one-way roundtrip results.
+  string search_id = 4; // unique id for search
+  string provider = 5; // provider name
+}
+
+message CombinedRoundtrip {
+  Flight outbound_flight = 1; // The cheapest/shortest one-way SFO-LAX flight.
+  Flight return_flight = 2; // The cheapest/shortest one-way LAX-SFO flight.
+  google.type.Money total_fare = 3; // Total fare for the combined roundtrip.
+  int32 total_duration_minutes = 4; // Total duration for the combined roundtrip.
+  string combined_trip_id = 5; // unique id for combined trip
+}
+
+
+// Represents the request for a flight search.
+message SearchFlightsRequest {
+  FlightSearchQuery query = 1;
+}
+
+// Represents the response for a flight search.
+message SearchFlightsResponse {
+  repeated FlightSearchResult results = 1;
+}
+
+// The Flight Search service definition.
+service FlightSearchService {
+  // Searches for flights based on the given query.
+  rpc SearchFlights(SearchFlightsRequest) returns (SearchFlightsResponse);
+}
+

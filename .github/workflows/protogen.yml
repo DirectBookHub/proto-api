@@ -1,0 +1,102 @@
+name: Generate Proto Code
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Protocol Buffer Compiler
+        uses: arduino/setup-protoc@v2
+        with:
+          version: '3.x' # Replace with your desired protoc version
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21' # Replace with your desired Go version
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.9.6
+
+      - name: Install Go Protobuf Plugins
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Generate Proto Code
+        run: |
+          mkdir -p gen # Create output directory
+          protoc \
+            --proto_path=protos \
+            --go_out=gen \
+            --go_opt=paths=source_relative \
+            --go-grpc_out=gen \
+            --go-grpc_opt=paths=source_relative \
+            --java_out=gen \
+            protos/v1/*.proto
+
+      - name: Build JAR with Maven
+        run: |
+          cd gen
+          git add . 
+          mvn clean install
+
+      - name: Publish to GitHub Packages
+        run: |
+          cd gen
+          # Configure Maven for GitHub Packages
+          echo "<settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>\${env.GITHUB_ACTOR}</username>
+                <password>\${env.GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>" > settings.xml
+          mvn deploy -s settings.xml -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }} -DskipTests
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add gen
+          git add gen/pom.xml
+          git add gen/settings.xml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: regenerate proto code and build java jar"
+            git push
+          fi
