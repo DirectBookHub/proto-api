@@ -63,10 +63,13 @@ jobs:
 
       - name: Build JAR with Maven
         run: |
+          cd gen
+          git add . 
           mvn clean install
 
       - name: Publish to GitHub Packages
         run: |
+          cd gen
           # Configure Maven for GitHub Packages
           echo "<settings>
             <servers>
@@ -88,12 +91,11 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add gen
+          git add genen  # Do not commit the generated code
+          git add gen/pom.xmlmmit pom.xml
+          git add gen/settings.xml
           if git diff --cached --quiet; then
             echo "No changes to commit"
-          else
+          elset commit -m "chore: update pom.xml"
             git commit -m "chore: regenerate proto code and build java jar"
-            git push
-          figit commit -m "Regenerate proto code and build Java JAR"
-
-            git push
+            git push          fi
