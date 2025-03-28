@@ -1,0 +1,119 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.dbh.gen</groupId>
+  <artifactId>dbh-java-api</artifactId>
+  <version>1.0.0</version>
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <maven.deploy.skip>false</maven.deploy.skip>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>3.25.3</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!-- os detect -maven-plugin -->
+      <plugin>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.7.1</version>
+        <executions>
+          <execution>
+            <id>detect-os</id>
+            <goals>
+              <goal>detect</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Maven Compiler Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <includes>
+            <include>**/*.java</include>
+          </includes>
+          <generatedSourcesDirectory>${project.build.directory}/generated-sources/protobuf/java</generatedSourcesDirectory>
+        </configuration>
+      </plugin>
+
+      <!-- Protobuf Maven Plugin -->
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.6.1</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <protocArtifact>com.google.protobuf:protoc:3.25.3:exe:${os.detected.classifier}</protocArtifact> <!-- Use protoc from Maven -->
+          <outputDirectory>${project.build.directory}/generated-sources/protobuf/java</outputDirectory>
+          <protoSourceRoot>${project.basedir}/protos</protoSourceRoot>
+          <pluginId>grpc-java</pluginId>
+        </configuration>
+      </plugin>
+
+      <!-- Maven JAR Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <includes>
+            <include>**/*.class</include>
+          </includes>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub main repo</name>
+      <url>https://maven.pkg.github.com/DirectBookHub/proto-api</url>
+    </repository>
+    <snapshotRepository>
+      <id>github</id>
+      <name>GitHub snapshot repo</name>
+      <url>https://maven.pkg.github.com/DirectBookHub/proto-api</url>
+    </snapshotRepository>
+  </distributionManagement>
+  <repositories>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/DirectBookHub/proto-api</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+    <pluginRepositories>
+    <pluginRepository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/DirectBookHub/proto-api</url>
+    </pluginRepository>
+  </pluginRepositories>
+</project>
