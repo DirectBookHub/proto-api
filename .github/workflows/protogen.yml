@@ -30,7 +30,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21' # Replace with your desired Go version
+          go-version: '1.21'
 
       - name: Install Java
         uses: actions/setup-java@v4
@@ -51,25 +51,17 @@ jobs:
 
       - name: Generate Proto Code
         run: |
-          mkdir -p gen # Create output directory
           protoc \
             --proto_path=protos \
-            --go_out=gen \
-            --go_opt=paths=source_relative \
-            --go-grpc_out=gen \
-            --go-grpc_opt=paths=source_relative \
             --java_out=gen \
             protos/v1/*.proto
 
       - name: Build JAR with Maven
         run: |
-          cd gen
-          git add . 
           mvn clean install
 
       - name: Publish to GitHub Packages
         run: |
-          cd gen
           # Configure Maven for GitHub Packages
           echo "<settings>
             <servers>
@@ -91,11 +83,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add genen  # Do not commit the generated code
-          git add gen/pom.xmlmmit pom.xml
-          git add gen/settings.xml
-          if git diff --cached --quiet; then
+          if git diff --cached --quiet; thenached --quiet; then
             echo "No changes to commit"
-          elset commit -m "chore: update pom.xml"
-            git commit -m "chore: regenerate proto code and build java jar"
-            git push          fi
+          else
+            git commit -m "chore: update pom.xml"t commit -m "chore: update pom.xml"
+            git push
+          fi
