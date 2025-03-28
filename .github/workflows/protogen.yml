@@ -63,21 +63,21 @@ jobs:
 
       - name: Build JAR with Maven
         run: |
-          mvn clean installean installean install
+          mvn clean install
 
-      - name: Publish to GitHub PackagestHub PackagestHub Packages
+      - name: Publish to GitHub Packages
         run: |
-          # Configure Maven for GitHub Packagesackagesackages
-          echo "<settings> "<settings> "<settings>
-            <servers>vers>vers>
+          # Configure Maven for GitHub Packages
+          echo "<settings>
+            <servers>
               <server>
-                <id>github</id></id></id>
-                <username>\${env.GITHUB_ACTOR}</username>name>\${env.GITHUB_ACTOR}</username>name>\${env.GITHUB_ACTOR}</username>
-                <password>\${env.GITHUB_TOKEN}</password>ord>\${env.GITHUB_TOKEN}</password>ord>\${env.GITHUB_TOKEN}</password>
+                <id>github</id>
+                <username>\${env.GITHUB_ACTOR}</username>
+                <password>\${env.GITHUB_TOKEN}</password>
               </server>
             </servers>
           </settings>" > settings.xml
-          mvn deploy -s settings.xml -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }} -DskipTests settings.xml -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }} -DskipTests settings.xml -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }} -DskipTests
+          mvn deploy -s settings.xml -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }} -DskipTests
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,12 +86,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --local user.email "action@github.com"t config --local user.email "action@github.com"t config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"on"on"
-          git add genadd genadd gen
-          git add gen/pom.xml
-          git add gen/settings.xml
-          if git diff --cached --quiet; thened --quiet; then
-            echo "No changes to commit"ore: regenerate proto code and build java jar"to commit"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add gen
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
           else
-            
+            git commit -m "chore: regenerate proto code and build java jar"
+            git push
+          figit commit -m "Regenerate proto code and build Java JAR"
+
+            git push
