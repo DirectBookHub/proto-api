@@ -1,11 +1,13 @@
 syntax = "proto3";
 
-package flightsearch;
+package com.dbh.flight;
 
 import "google/type/money.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/traveldpoc/flight-api/gen/v1;flightsearch";
+option java_multiple_files = true;
+option java_package = "com.dbh.flight";
 
 
 // Represents a location (airport).
