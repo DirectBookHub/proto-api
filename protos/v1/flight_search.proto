@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-package com.dbh.flight;
+package dbh.proto;
 
 import "google/type/money.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/traveldpoc/flight-api/gen/v1;flightsearch";
 option java_multiple_files = true;
-option java_package = "com.dbh.flight";
+option java_package = "com.dbh.proto";
 
 
 // Represents a location (airport).
@@ -107,18 +107,18 @@ message CombinedRoundtrip {
 
 
 // Represents the request for a flight search.
-message SearchFlightsRequest {
+message FlightSearchRequest {
   FlightSearchQuery query = 1;
 }
 
 // Represents the response for a flight search.
-message SearchFlightsResponse {
+message FlightSearchResponse {
   repeated FlightSearchResult results = 1;
 }
 
 // The Flight Search service definition.
 service FlightSearchService {
   // Searches for flights based on the given query.
-  rpc SearchFlights(SearchFlightsRequest) returns (SearchFlightsResponse);
+  rpc SearchFlights(FlightSearchRequest) returns (FlightSearchResponse);
 }
 
