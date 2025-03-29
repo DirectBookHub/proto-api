@@ -116,9 +116,9 @@ message FlightSearchResponse {
   repeated FlightSearchResult results = 1;
 }
 
-// The Flight Search service definition.
-service FlightSearchService {
+// The Flight service definition.
+service FlightService {
   // Searches for flights based on the given query.
-  rpc SearchFlights(FlightSearchRequest) returns (FlightSearchResponse);
+  rpc FlightSearch(FlightSearchRequest) returns (FlightSearchResponse);
 }
 
