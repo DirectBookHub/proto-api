@@ -54,7 +54,7 @@ jobs:
           protoc \
             --proto_path=src/main/proto \
             --java_out=gen \
-            protos/v1/*.proto
+            proto/v1/*.proto
 
       - name: Build JAR with Maven
         run: |
