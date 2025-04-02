@@ -52,7 +52,7 @@ jobs:
       - name: Generate Proto Code
         run: |
           protoc \
-            --proto_path=protos \
+            --proto_path=src/main/protos \
             --java_out=gen \
             protos/v1/*.proto
 
@@ -76,16 +76,3 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit and Push Changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: update pom.xml"
-            git push
-          fi
