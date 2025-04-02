@@ -49,12 +49,7 @@ jobs:
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
-      - name: Generate Proto Code
-        run: |
-          protoc \
-            --proto_path=src/main/proto \
-            --java_out=gen \
-            proto/v1/*.proto
+    
 
       - name: Build JAR with Maven
         run: |
